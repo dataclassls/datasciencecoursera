@@ -1,0 +1,53 @@
+---
+title: "Machine_Learning_Project"
+author: "Song Liu"
+date: "Thursday, April 16, 2015"
+output: html_document
+---
+
+This is an R Markdown document for project descriptions.
+```{r}
+## 1) Data Survey
+   ## Do a summary of the data. Any column with number of high NA's is excluded.
+   ## Time related itmes, such "raw_timestamp_part_2", seem not correlate to 
+   ## classe column.So they are excluded from modeling.
+   ## There are 52 columns with full numeric data and there are few column 
+   ## correlated each other, but most of them don't have high correlation each 
+   ## other or any single column has signficant correlation with classe column.
+##2) Feature Creation 
+   ## Since I don't have enough time to get domain knowledge, and the sample 
+   ## size is large enough,  I decided to use all 52 numberic columns to predict  
+   ## classe
+##3) Algorithm
+   ## randomForest is a popular choice for classification modeling
+   ## Training data set will divided into two portion. 70% of data are used for 
+   ## model traing, and 30% of data are used for model validation.
+   ## Estimate error: Accuracy should be greater than 95%.
+##4) Code and results
+
+    library(caret)
+    library(randomForest)
+    
+    mydata<-read.csv("pml-training.csv")
+    mydata2<-mydata[,grep("^gyro|^magnet|^accel|^roll|^pitch|^yaw|^total|classe"   
+    ,colnames(mydata))]
+
+    featurePlot(x=mydata2[,48:52],y=mydata$classe,plot="box")
+    
+    cor(mydata2[,48:52])
+    
+    trainIndex <- createDataPartition(mydata2$classe, p = 0.70,list=FALSE)
+    training<-mydata2[trainIndex,]
+    testing<-mydata2[-trainIndex,]
+    
+    fit5<-randomForest(training$classe ~.,data=training[,1:52], ntree=300, mtry=15, 
+    importance=TRUE)
+    confusionMatrix(testing$classe,predict(fit5,testing))
+    ##20 Cases Testing (submitted to website, 100% right)
+    mydata3<-read.csv("pml-testing.csv")
+    predictions<-predict(fit5,mydata3[,grep("^gyro|^magnet|^accel|^roll|^pitch|^yaw|^total",colnames(mydata3))])
+    predictions
+```
+   
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

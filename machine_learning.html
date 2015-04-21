@@ -83,7 +83,8 @@ img {
    ## randomForest is a popular choice for classification modeling
    ## Training data set will divided into two portion. 70% of data are used for 
    ## model traing, and 30% of data are used for model validation.
-   ## Estimate error: Accuracy should be greater than 95%.
+   ## Estimate error: Cross validation indicates 36 variables should be enough. 
+   ## Accuracy should be greater than 98%.
 ##4) Code and results
 
     library(caret)</code></pre>
@@ -115,43 +116,51 @@ img {
     training&lt;-mydata2[trainIndex,]
     testing&lt;-mydata2[-trainIndex,]
     
-    fit5&lt;-randomForest(training$classe ~.,data=training[,1:52], ntree=300, mtry=15, 
-    importance=TRUE)
-    confusionMatrix(testing$classe,predict(fit5,testing))</code></pre>
+    ##cross validation
+    tst &lt;- rfcv(trainx = training[,-53], trainy = training[,53], scale = &quot;log&quot;, step=0.7) 
+    tst$error.cv</code></pre>
+<pre><code>##          52          36          25          18          12           9 
+## 0.007061222 0.007570794 0.009609085 0.012739317 0.012229744 0.014122443 
+##           6           4           3           2           1 
+## 0.049137366 0.065152508 0.120331950 0.382980272 0.613816699</code></pre>
+<pre class="r"><code>   ##modeling
+    fit6&lt;-randomForest(mydata2$classe ~gyros_arm_z+gyros_forearm_x+gyros_dumbbell_z+gyros_forearm_z+total_accel_forearm+gyros_belt_x+accel_belt_x+gyros_belt_y+total_accel_arm+accel_belt_y+gyros_forearm_y+accel_arm_z+gyros_dumbbell_x+gyros_arm_x+accel_forearm_y+accel_arm_y+gyros_arm_y+total_accel_belt+pitch_dumbbell+pitch_arm+magnet_arm_z+yaw_forearm+magnet_arm_y+accel_dumbbell_x+magnet_forearm_x+magnet_forearm_y+magnet_arm_x+accel_arm_x+yaw_arm+gyros_dumbbell_y+accel_forearm_z+yaw_dumbbell+magnet_belt_x+gyros_belt_z+total_accel_dumbbell+accel_dumbbell_z,data=mydata2, ntree=500, mtry=15, importance=TRUE)
+  ##testing
+  confusionMatrix(testing$classe,predict(fit6,testing))</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
 ##          A 1674    0    0    0    0
-##          B    7 1131    1    0    0
-##          C    0    8 1017    1    0
-##          D    0    0   12  952    0
-##          E    0    0    0    6 1076
+##          B    0 1139    0    0    0
+##          C    0    0 1026    0    0
+##          D    0    0    0  964    0
+##          E    0    0    0    0 1082
 ## 
 ## Overall Statistics
-##                                           
-##                Accuracy : 0.9941          
-##                  95% CI : (0.9917, 0.9959)
-##     No Information Rate : 0.2856          
-##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
-##                                           
-##                   Kappa : 0.9925          
-##  Mcnemar's Test P-Value : NA              
+##                                      
+##                Accuracy : 1          
+##                  95% CI : (0.9994, 1)
+##     No Information Rate : 0.2845     
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
+##                                      
+##                   Kappa : 1          
+##  Mcnemar's Test P-Value : NA         
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9958   0.9930   0.9874   0.9927   1.0000
-## Specificity            1.0000   0.9983   0.9981   0.9976   0.9988
-## Pos Pred Value         1.0000   0.9930   0.9912   0.9876   0.9945
-## Neg Pred Value         0.9983   0.9983   0.9973   0.9986   1.0000
-## Prevalence             0.2856   0.1935   0.1750   0.1630   0.1828
-## Detection Rate         0.2845   0.1922   0.1728   0.1618   0.1828
+## Sensitivity            1.0000   1.0000   1.0000   1.0000   1.0000
+## Specificity            1.0000   1.0000   1.0000   1.0000   1.0000
+## Pos Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2845   0.1935   0.1743   0.1638   0.1839
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
-## Balanced Accuracy      0.9979   0.9956   0.9928   0.9951   0.9994</code></pre>
-<pre class="r"><code>    ##20 Cases Testing (submitted to website, 100% right)
+## Balanced Accuracy      1.0000   1.0000   1.0000   1.0000   1.0000</code></pre>
+<pre class="r"><code>  ##20 Cases Testing (submitted to website, 100% right)
     mydata3&lt;-read.csv(&quot;pml-testing.csv&quot;)
-    predictions&lt;-predict(fit5,mydata3[,grep(&quot;^gyro|^magnet|^accel|^roll|^pitch|^yaw|^total&quot;,colnames(mydata3))])
+    predictions&lt;-predict(fit6,mydata3[,grep(&quot;^gyro|^magnet|^accel|^roll|^pitch|^yaw|^total&quot;,colnames(mydata3))])
     predictions</code></pre>
 <pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
 ##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 

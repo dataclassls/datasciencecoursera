@@ -22,7 +22,8 @@ This is an R Markdown document for project descriptions.
    ## randomForest is a popular choice for classification modeling
    ## Training data set will divided into two portion. 70% of data are used for 
    ## model traing, and 30% of data are used for model validation.
-   ## Estimate error: Accuracy should be greater than 95%.
+   ## Estimate error: Cross validation indicates 36 variables should be enough. 
+   ## Accuracy should be greater than 98%.
 ##4) Code and results
 
     library(caret)
@@ -40,12 +41,16 @@ This is an R Markdown document for project descriptions.
     training<-mydata2[trainIndex,]
     testing<-mydata2[-trainIndex,]
     
-    fit5<-randomForest(training$classe ~.,data=training[,1:52], ntree=300, mtry=15, 
-    importance=TRUE)
-    confusionMatrix(testing$classe,predict(fit5,testing))
-    ##20 Cases Testing (submitted to website, 100% right)
+    ##cross validation
+    tst <- rfcv(trainx = training[,-53], trainy = training[,53], scale = "log", step=0.7) 
+    tst$error.cv
+   ##modeling
+    fit6<-randomForest(mydata2$classe ~gyros_arm_z+gyros_forearm_x+gyros_dumbbell_z+gyros_forearm_z+total_accel_forearm+gyros_belt_x+accel_belt_x+gyros_belt_y+total_accel_arm+accel_belt_y+gyros_forearm_y+accel_arm_z+gyros_dumbbell_x+gyros_arm_x+accel_forearm_y+accel_arm_y+gyros_arm_y+total_accel_belt+pitch_dumbbell+pitch_arm+magnet_arm_z+yaw_forearm+magnet_arm_y+accel_dumbbell_x+magnet_forearm_x+magnet_forearm_y+magnet_arm_x+accel_arm_x+yaw_arm+gyros_dumbbell_y+accel_forearm_z+yaw_dumbbell+magnet_belt_x+gyros_belt_z+total_accel_dumbbell+accel_dumbbell_z,data=mydata2, ntree=500, mtry=15, importance=TRUE)
+  ##testing
+  confusionMatrix(testing$classe,predict(fit6,testing))
+  ##20 Cases Testing (submitted to website, 100% right)
     mydata3<-read.csv("pml-testing.csv")
-    predictions<-predict(fit5,mydata3[,grep("^gyro|^magnet|^accel|^roll|^pitch|^yaw|^total",colnames(mydata3))])
+    predictions<-predict(fit6,mydata3[,grep("^gyro|^magnet|^accel|^roll|^pitch|^yaw|^total",colnames(mydata3))])
     predictions
 ```
    

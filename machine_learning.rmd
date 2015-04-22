@@ -7,24 +7,25 @@ output: html_document
 
 This is an R Markdown document for project descriptions.
 ```{r}
-## 1) Data Survey
+#1) Data Survey
    ## Do a summary of the data. Any column with number of high NA's is excluded.
    ## Time related itmes, such "raw_timestamp_part_2", seem not correlate to 
    ## classe column.So they are excluded from modeling.
    ## There are 52 columns with full numeric data and there are few column 
    ## correlated each other, but most of them don't have high correlation each 
    ## other or any single column has signficant correlation with classe column.
-##2) Feature Creation 
+#2) Feature Creation 
    ## Since I don't have enough time to get domain knowledge, and the sample 
    ## size is large enough,  I decided to use all 52 numberic columns to predict  
    ## classe
-##3) Algorithm
+#3) Algorithm
    ## randomForest is a popular choice for classification modeling
    ## Training data set will divided into two portion. 70% of data are used for 
    ## model traing, and 30% of data are used for model validation.
-   ## Estimate error: Cross validation indicates 36 variables should be enough. 
+   ## Estimate error: 5 fold Cross validation indicates 36 variables should be 
+   ## enough. 
    ## Accuracy should be greater than 98%.
-##4) Code and results
+#4) Code and results
 
     library(caret)
     library(randomForest)
@@ -42,8 +43,10 @@ This is an R Markdown document for project descriptions.
     testing<-mydata2[-trainIndex,]
     
     ##cross validation
-    tst <- rfcv(trainx = training[,-53], trainy = training[,53], scale = "log", step=0.7) 
+    tst <- rfcv(trainx = training[,-53], trainy = training[,53], cv.fold=5,scale = "log", step=0.7) 
+    with(tst, plot(n.var, error.cv, log="x", type="o", lwd=2))
     tst$error.cv
+
    ##modeling
     fit6<-randomForest(mydata2$classe ~gyros_arm_z+gyros_forearm_x+gyros_dumbbell_z+gyros_forearm_z+total_accel_forearm+gyros_belt_x+accel_belt_x+gyros_belt_y+total_accel_arm+accel_belt_y+gyros_forearm_y+accel_arm_z+gyros_dumbbell_x+gyros_arm_x+accel_forearm_y+accel_arm_y+gyros_arm_y+total_accel_belt+pitch_dumbbell+pitch_arm+magnet_arm_z+yaw_forearm+magnet_arm_y+accel_dumbbell_x+magnet_forearm_x+magnet_forearm_y+magnet_arm_x+accel_arm_x+yaw_arm+gyros_dumbbell_y+accel_forearm_z+yaw_dumbbell+magnet_belt_x+gyros_belt_z+total_accel_dumbbell+accel_dumbbell_z,data=mydata2, ntree=500, mtry=15, importance=TRUE)
   ##testing
